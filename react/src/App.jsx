@@ -2,6 +2,14 @@ import React from 'react';
 import DashboardContainer from './components/DashboardContainer';
 import $ from 'jquery';
 import moment from 'moment'
+import styled from 'styled-components';
+
+const Container = styled.section`
+  margin: auto 0;
+  content-align: center;
+  max-width: 500px;
+  padding-left: 20px;
+`;
 
 class App extends React.Component {
   constructor(props) {
@@ -182,8 +190,6 @@ class App extends React.Component {
       }
     }
 
-    console.log(`membersEarliestCheckin: ${JSON.stringify(membersEarliestCheckin)}`);
-
     for (var key in membersEarliestCheckin) {
       date = moment(membersEarliestCheckin[key][0]);
       dayOfWeek = date.day();
@@ -232,10 +238,16 @@ class App extends React.Component {
     }
   }
 
+  closeWidget (e) {
+    e.preventDefault()
+  }
+
   render() {
     return (
       <div>
-        <DashboardContainer setDate={this.setDate.bind(this)} mostPopularAgreementOnBusiestDay={this.state.mostPopularAgreementOnBusiestDay} mostPopularAgreement={this.state.mostPopularAgreement} busiestDay={this.state.busiestDay} setLocation={this.setLocation.bind(this)} />
+        <Container>
+          <DashboardContainer closeWidget={this.closeWidget.bind(this)} setDate={this.setDate.bind(this)} mostPopularAgreementOnBusiestDay={this.state.mostPopularAgreementOnBusiestDay} mostPopularAgreement={this.state.mostPopularAgreement} busiestDay={this.state.busiestDay} setLocation={this.setLocation.bind(this)} />
+        </Container>
       </div>
     )
   }

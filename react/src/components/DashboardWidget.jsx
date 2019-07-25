@@ -30,9 +30,9 @@ class DashboardWidget extends React.Component {
               <option value="4">Northern Liberties</option>
             </select>
           </form>
-          <p>Busiest Day: {this.props.busiestDay}</p>
-          <p>Most Popular Agreement: {this.props.mostPopularAgreement}</p>
-          <p>Most Popular Agreement on Busiest Day: {this.props.mostPopularAgreementOnBusiestDay}</p>
+          <p><b>Busiest Day:</b> {this.props.busiestDay}</p>
+          <p><b>Most Popular Agreement:</b> {this.props.mostPopularAgreement}</p>
+          <p><b>Most Popular Agreement on Busiest Day:</b> {this.props.mostPopularAgreementOnBusiestDay}</p>
         </Container>
         </div>
       )

@@ -9,6 +9,7 @@ const Container = styled.section`
   content-align: center;
   max-width: 500px;
   padding-left: 20px;
+  font-family: Arial;
 `;
 
 class App extends React.Component {
@@ -24,6 +25,7 @@ class App extends React.Component {
       fromDate: null,
       toDate: null,
       renderChild: true,
+      renderMock: false,
     }
   }
 
@@ -248,14 +250,16 @@ class App extends React.Component {
 
   addNewWidget(e) {
     e.preventDefault();
-    console.log('Adding new widget!');
+    this.setState({
+      renderMock: true,
+    })
   }
 
   render() {
     return (
       <div>
         <Container>
-          <DashboardContainer addNewWidget={this.addNewWidget.bind(this)} renderChild={this.state.renderChild} closeWidget={this.closeWidget.bind(this)} setDate={this.setDate.bind(this)} mostPopularAgreementOnBusiestDay={this.state.mostPopularAgreementOnBusiestDay} mostPopularAgreement={this.state.mostPopularAgreement} busiestDay={this.state.busiestDay} setLocation={this.setLocation.bind(this)} />
+          <DashboardContainer renderMock={this.state.renderMock} addNewWidget={this.addNewWidget.bind(this)} renderChild={this.state.renderChild} closeWidget={this.closeWidget.bind(this)} setDate={this.setDate.bind(this)} mostPopularAgreementOnBusiestDay={this.state.mostPopularAgreementOnBusiestDay} mostPopularAgreement={this.state.mostPopularAgreement} busiestDay={this.state.busiestDay} setLocation={this.setLocation.bind(this)} />
         </Container>
       </div>
     )

@@ -4,11 +4,13 @@
   "main": "index.js",
   "scripts": {
     "start": "webpack-dev-server --config ./webpack.config.js --mode development --open",
-    "test": "echo \"You'll have to bootstrap your own testing environment\" && exit 1"
+    "server": "nodemon server/index.js",
+    "test": "jest --coverage"
   },
   "author": "Club OS",
   "dependencies": {
     "axios": "^0.19.0",
+    "jest": "^24.8.0",
     "jquery": "^3.4.1",
     "moment": "^2.24.0",
     "prop-types": "^15.6.2",

@@ -16,41 +16,28 @@ class App extends React.Component {
   }
 
   componentDidMount() {
+    const randomId = Math.round(Math.random() * 4) + 1;
     var checkinPromise = new Promise ((resolve, reject) => {
-      this.getApiData('member-checkins', () => {
+      this.getApiData('member-checkins', randomId, () => {
         resolve();
       });
     })
     var agreementsPromise = new Promise ((resolve, reject) => {
-      this.getApiData('member-agreements', () => {
+      this.getApiData('member-agreements', randomId, () => {
         resolve();
       });
     })
     Promise.all([checkinPromise, agreementsPromise]).then(() => {
       var newMostPopularAgreementOnBusiestDay = this.findMostPopularAgreementOnBusiestDay();
-      // var isUnique = this.testForUniqueMemberIds();
-      // console.log(isUnique);
       this.setState({
         mostPopularAgreementOnBusiestDay: newMostPopularAgreementOnBusiestDay,
       })
     })
   }
 
-  testForUniqueMemberIds() {
-    var memberIds = {};
-    for (var i = 0; i < this.state.allCheckinData.length; i++) {
-      if (memberIds.hasOwnProperty(this.state.allCheckinData[i].memberId) === true) {
-        memberIds[this.state.allCheckinData[i].memberId]++;
-      } else {
-        memberIds[this.state.allCheckinData[i].memberId] = 1;
-      }
-    }
-    console.log(`memberIds: ${JSON.stringify(memberIds) }`);
-  }
-
-  getApiData(endpoint, callback) {
+  getApiData(endpoint, locationId, callback) {
     $.ajax({
-      url: `http://localhost:3000/locations/1/${endpoint}`,
+      url: `http://localhost:3000/locations/${locationId}/${endpoint}`,
       success: apiData => {
         if (endpoint === 'member-checkins') {
           var newBusiestDay = this.findBusiestDay(apiData);

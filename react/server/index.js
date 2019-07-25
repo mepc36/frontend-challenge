@@ -12,8 +12,10 @@ app.listen(port, () => {
   console.log(`Listening on port ${port}`);
 })
 
-app.get(`/locations/1/member-checkins`, (request, response) => {
-  axios.get(`https://code-challenge-api.club-os.com/api/locations/1/member-checkins`)
+app.get('/locations/:id/member-checkins', (request, response) => {
+  const idTwo = request.params.id;
+  console.log(`idTwo: ${idTwo}`);
+  axios.get(`https://code-challenge-api.club-os.com/api/locations/${idTwo}/member-checkins`)
   .then(apiResponse => {
     response.status(200).json(apiResponse.data.data)
   })
@@ -23,8 +25,10 @@ app.get(`/locations/1/member-checkins`, (request, response) => {
   })
 })
 
-app.get(`/locations/1/member-agreements`, (request, response) => {
-  axios.get(`https://code-challenge-api.club-os.com/api/locations/1/member-agreements`)
+app.get('/locations/:id/member-agreements', (request, response) => {
+  const idThree = request.params.id;
+  console.log(`idThree: ${idThree}`);
+  axios.get(`https://code-challenge-api.club-os.com/api/locations/${idThree}/member-agreements`)
   .then(apiResponse => {
     response.status(200).json(apiResponse.data.data)
   })

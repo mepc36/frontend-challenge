@@ -7,7 +7,8 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-
+      busiestDay: '',
+      mostPopularPlan: '',
     }
   }
 
@@ -16,9 +17,24 @@ class App extends React.Component {
       method: 'GET',
       url: `http://localhost:3000/locations/1/member-checkins`,
       success: checkinData => {
-        // console.log(`App.jsx success: ${JSON.stringify(checkinData[0])}`);
-        var busiestDay = this.calculateBusiestDay(checkinData);
-        console.log(`busiestDay: ${busiestDay}`);
+        var newBusiestDay = this.findBusiestDay(checkinData);
+        this.setState({
+          busiestDay: newBusiestDay,
+        });
+      },
+      error: error => {
+        console.log(`App.jsx error: ${JSON.stringify(error)}`);
+      }
+    })
+
+    $.ajax({
+      method: 'GET',
+      url: `http://localhost:3000/locations/1/member-agreements`,
+      success: agreementData => {
+        var newMostPopularPlan = this.findMostPopularAgreement(agreementData);
+        this.setState({
+          mostPopularPlan: newMostPopularPlan,
+        })
       },
       error: error => {
         console.log(`App.jsx error: ${JSON.stringify(error)}`);
@@ -26,7 +42,7 @@ class App extends React.Component {
     })
   }
 
-  calculateBusiestDay(checkinInfo) {
+  findBusiestDay(checkinInfo) {
     var date, dow, busiestDayString, busiestDayNumber;
     var dayCounter = [0, 0, 0, 0, 0, 0, 0];
     var numberToDayConverter = {
@@ -42,18 +58,43 @@ class App extends React.Component {
     for (var i = 0; i < checkinInfo.length; i++) {
       date = moment(checkinInfo[i].date);
       dow = date.day();
-      dayCounter[dow] += 1;
+      dayCounter[dow]++;
     }
 
     busiestDayNumber = 0;
 
-    for (var i = 1; i < dayCounter.length - 1; i++) {
+    for (var i = 1; i < dayCounter.length; i++) {
       if (dayCounter[i] > dayCounter[busiestDayNumber]) {
         busiestDayNumber = i;
       }
     }
     busiestDayString = numberToDayConverter[busiestDayNumber];
     return busiestDayString;
+  }
+
+  findMostPopularAgreement(agreementInfo) {
+    var agreementPlanNumber, mostPopularPlanNumber, mostPopularPlanString;
+    var numberToAgreementConverter = {
+      0: 'Basic',
+      1: 'Standard',
+      2: 'Platinum',
+    }
+
+    var agreementCounter = [0, 0, 0]
+
+    for (var i = 0; i < agreementInfo.length; i++) {
+      agreementPlanNumber = agreementInfo[i].agreement - 1;
+      agreementCounter[agreementPlanNumber]++;
+    }
+
+    mostPopularPlanNumber = 0;
+    for (var i = 1; i < agreementCounter.length; i++) {
+      if (agreementCounter[i] > agreementCounter[mostPopularPlanNumber]) {
+        mostPopularPlanNumber = i;
+      }
+    }
+    mostPopularPlanString = numberToAgreementConverter[mostPopularPlanNumber];
+    return mostPopularPlanString;
   }
 
   render() {

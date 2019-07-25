@@ -15,7 +15,17 @@ app.listen(port, () => {
 app.get(`/locations/1/member-checkins`, (request, response) => {
   axios.get(`https://code-challenge-api.club-os.com/api/locations/1/member-checkins`)
   .then(apiResponse => {
-    // console.log(apiResponse.data.data[0]); // all member's info; individual members are accessed by adding bracketed array indexes
+    response.status(200).json(apiResponse.data.data)
+  })
+  .catch(function (error) {
+    console.log(error);
+    response.status(500).json(error);
+  })
+})
+
+app.get(`/locations/1/member-agreements`, (request, response) => {
+  axios.get(`https://code-challenge-api.club-os.com/api/locations/1/member-agreements`)
+  .then(apiResponse => {
     response.status(200).json(apiResponse.data.data)
   })
   .catch(function (error) {

@@ -23,6 +23,7 @@ class App extends React.Component {
       locationId: 1,
       fromDate: null,
       toDate: null,
+      renderChild: true,
     }
   }
 
@@ -239,14 +240,22 @@ class App extends React.Component {
   }
 
   closeWidget (e) {
-    e.preventDefault()
+    e.preventDefault();
+    this.setState({
+      renderChild: false,
+    })
+  }
+
+  addNewWidget(e) {
+    e.preventDefault();
+    console.log('Adding new widget!');
   }
 
   render() {
     return (
       <div>
         <Container>
-          <DashboardContainer closeWidget={this.closeWidget.bind(this)} setDate={this.setDate.bind(this)} mostPopularAgreementOnBusiestDay={this.state.mostPopularAgreementOnBusiestDay} mostPopularAgreement={this.state.mostPopularAgreement} busiestDay={this.state.busiestDay} setLocation={this.setLocation.bind(this)} />
+          <DashboardContainer addNewWidget={this.addNewWidget.bind(this)} renderChild={this.state.renderChild} closeWidget={this.closeWidget.bind(this)} setDate={this.setDate.bind(this)} mostPopularAgreementOnBusiestDay={this.state.mostPopularAgreementOnBusiestDay} mostPopularAgreement={this.state.mostPopularAgreement} busiestDay={this.state.busiestDay} setLocation={this.setLocation.bind(this)} />
         </Container>
       </div>
     )

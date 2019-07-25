@@ -1,4 +1,11 @@
 import React from 'react';
+import styled from 'styled-components';
+
+const Container = styled.section`
+  padding-left: 20px;
+  margin: 20px;
+  border: '1px solid black';
+`;
 
 class FilterDate extends React.Component {
   constructor(props) {
@@ -10,6 +17,7 @@ class FilterDate extends React.Component {
 
   render() {
     return (
+      <Container>
       <div>
         <h4>Filter Date:</h4>
         <form onChange={(e) => this.props.setDate(e, 'from')}>
@@ -19,6 +27,7 @@ class FilterDate extends React.Component {
           <input type="date"></input>
         </form>
       </div>
+      </Container>
     )
   }
 }

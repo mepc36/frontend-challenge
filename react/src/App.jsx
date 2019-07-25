@@ -12,18 +12,25 @@ class App extends React.Component {
       allAgreementData: [],
       mostPopularAgreement: '',
       mostPopularAgreementOnBusiestDay: '',
+      locationId: 1,
+      fromDate: null,
+      toDate: null,
     }
   }
 
   componentDidMount() {
-    const randomId = Math.round(Math.random() * 4) + 1;
-    var checkinPromise = new Promise ((resolve, reject) => {
-      this.getApiData('member-checkins', randomId, () => {
+    this.refreshPagesInfo();
+  }
+
+  refreshPagesInfo() {
+    const locationId = this.state.locationId
+    var checkinPromise = new Promise((resolve, reject) => {
+      this.getApiData('member-checkins', locationId, () => {
         resolve();
       });
     })
-    var agreementsPromise = new Promise ((resolve, reject) => {
-      this.getApiData('member-agreements', randomId, () => {
+    var agreementsPromise = new Promise((resolve, reject) => {
+      this.getApiData('member-agreements', locationId, () => {
         resolve();
       });
     })
@@ -39,11 +46,22 @@ class App extends React.Component {
     $.ajax({
       url: `http://localhost:3000/locations/${locationId}/${endpoint}`,
       success: apiData => {
+        var filteredDates = [];
         if (endpoint === 'member-checkins') {
+
+          for (var i = 0; i < apiData.length; i++) {
+            var fromDate = new Date(this.state.fromDate);
+            var toDate = new Date(this.state.toDate);
+            var apiDataDate = new Date(apiData[i].date);
+            if (moment(apiDataDate).isAfter(fromDate) && moment(apiDataDate).isBefore(toDate)) {
+              filteredDates.push(apiData[i])
+            }
+          }
+
           var newBusiestDay = this.findBusiestDay(apiData);
           this.setState({
             busiestDay: newBusiestDay,
-            allCheckinData: apiData,
+            allCheckinData: filteredDates,
           });
         } else {
           var newMostPopularAgreement = this.findMostPopularAgreement(apiData);
@@ -61,7 +79,7 @@ class App extends React.Component {
   }
 
   findBusiestDay(checkinInfo) {
-    var date, dayOfWeek, busiestDayString; 
+    var date, dayOfWeek, busiestDayString;
     var busiestDayNumber = 0;
     var dayCounter = [0, 0, 0, 0, 0, 0, 0];
     var numberToDayConverter = {
@@ -117,9 +135,8 @@ class App extends React.Component {
     var mostBusyDay = this.state.busiestDay;
     var checkinData = this.state.allCheckinData;
     var agreementData = this.state.allAgreementData;
-    var membersWithMultipleCheckinsDates = [];
-    var oneMembersCheckins = [];
-    var allCheckInsOnBusiestDay = [];
+    var membersEarliestCheckin = {};
+    var membersWhoCheckedInOnEarliestDay = [];
     var date, dayOfWeek, mostPopularAgreementOnBusiestDayNumber, mostPopularAgreementOnBusiestDayString;
     var dayToNumberConverter = {
       'Sunday': 0,
@@ -138,62 +155,51 @@ class App extends React.Component {
 
     var busiestDayAgreementCounter = [0, 0, 0]
     var mostPopularDayNumber = dayToNumberConverter[mostBusyDay];
-    
-    // Find members with multiple check ins:
-    // var memberIds = {};
-    // for (var i = 0; i < checkinData.length; i++) {
-    //   if (memberIds.hasOwnProperty(checkinData[i].memberId) === true) {
-    //     memberIds[checkinData[i].memberId]++;
-    //   } else {
-    //     memberIds[checkinData[i].memberId] = 1;
-    //   }
-    // }
 
-    // // Get the dates of members with multiple check ins;
-    // for (var key in memberIds) {
-    //   if (memberIds[key] > 1) {
-    //     for (var i = 0; i < checkinData.length; i++) {
-    //       if (checkinData[i].memberId === parseInt(key)) {
-    //         membersWithMultipleCheckinsDates.push(checkinData[i]);
-    //       }
-    //     }
-    //   }
-    // }
-    // console.log(membersWithMultipleCheckinsDates);
-
-    // // Find each member's earliest check in:
-    // for (var i = 0; i < membersWithMultipleCheckinsDates.length; i++) {
-    //   for (var j = 1; j < membersWithMultipleCheckinsDates.length; j++) {
-    //     if (membersWithMultipleCheckinsDates[i].memberId === membersWithMultipleCheckinsDates[j].memberId) {
-    //       oneMembersCheckinsDates.push(membersWithMultipleCheckinsDates[i]);
-    //       oneMembersCheckinsDates.push(membersWithMultipleCheckinsDates[j]);
-    //     }
-
-    //   }
-    // }
-
-
-    // Find all check-ins that happened on my most popular day:
     for (var i = 0; i < checkinData.length; i++) {
-      date = moment(checkinData[i].date);
+      if (membersEarliestCheckin.hasOwnProperty(checkinData[i].memberId)) {
+        membersEarliestCheckin[checkinData[i].memberId].push(checkinData[i].date);
+      } else {
+        var newDate = [];
+        newDate.push(checkinData[i].date);
+        membersEarliestCheckin[checkinData[i].memberId] = newDate;
+        newDate = [];
+      }
+    }
+
+    for (var key in membersEarliestCheckin) {
+      if (membersEarliestCheckin[key].length > 1) {
+        var earliestDate = new Date(membersEarliestCheckin[key][0]);
+        for (var i = 1; i < membersEarliestCheckin[key].length; i++) {
+          var nextDate = new Date(membersEarliestCheckin[key][i])
+          if (moment(nextDate).isBefore(earliestDate)) {
+            earliestDate = nextDate;
+          }
+        }
+        var newDates = [];
+        newDates.push(earliestDate);
+        membersEarliestCheckin[key] = newDates;
+      }
+    }
+
+    console.log(`membersEarliestCheckin: ${JSON.stringify(membersEarliestCheckin)}`);
+
+    for (var key in membersEarliestCheckin) {
+      date = moment(membersEarliestCheckin[key][0]);
       dayOfWeek = date.day();
       if (dayOfWeek === mostPopularDayNumber) {
-        allCheckInsOnBusiestDay.push(checkinData[i]);
+        membersWhoCheckedInOnEarliestDay.push(key);
       }
     }
 
-
-
-    // Count up how many times each plan was signed up for on the busiest day:
-    for (var i = 0; i < allCheckInsOnBusiestDay.length; i++) {
+    for (var i = 0; i < membersWhoCheckedInOnEarliestDay.length; i++) {
       for (var j = 0; j < agreementData.length; j++) {
-          if (allCheckInsOnBusiestDay[i].memberId === agreementData[j].memberId) {
-            busiestDayAgreementCounter[agreementData[j].agreement - 1]++;
-          }
+        if (membersWhoCheckedInOnEarliestDay[i] === agreementData[j].memberId) {
+          busiestDayAgreementCounter[agreementData[j].agreement - 1]++;
+        }
       }
     }
 
-    // Identify the most popular plan by number:
     mostPopularAgreementOnBusiestDayNumber = 0
     for (var i = 1; i < busiestDayAgreementCounter; i++) {
       if (busiestDayAgreementCounter[i] > mostPopularAgreementOnBusiestDay) {
@@ -201,15 +207,35 @@ class App extends React.Component {
       }
     }
 
-    // Convert that number to a string:
     mostPopularAgreementOnBusiestDayString = numberToAgreementConverter[mostPopularAgreementOnBusiestDayNumber];
     return mostPopularAgreementOnBusiestDayString;
+  }
+
+  setLocation(e) {
+    e.preventDefault();
+    this.setState({
+      locationId: parseInt(e.target.value),
+    })
+    this.refreshPagesInfo();
+  }
+
+  setDate(e, fromOrTo) {
+    e.preventDefault();
+    if (fromOrTo === 'from') {
+      this.setState({
+        fromDate: new Date(e.target.value).toISOString(),
+      });
+    } else {
+      this.setState({
+        toDate: new Date(e.target.value).toISOString(),
+      });
+    }
   }
 
   render() {
     return (
       <div>
-        <DashboardContainer example="Coming soon!" />
+        <DashboardContainer setDate={this.setDate.bind(this)} mostPopularAgreementOnBusiestDay={this.state.mostPopularAgreementOnBusiestDay} mostPopularAgreement={this.state.mostPopularAgreement} busiestDay={this.state.busiestDay} setLocation={this.setLocation.bind(this)} />
       </div>
     )
   }
